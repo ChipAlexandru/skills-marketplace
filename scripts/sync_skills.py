@@ -668,10 +668,11 @@ def build_skills_array(parsed_skills, metadata, existing_skills=None):
         if not is_valid_semver(version):
             version = "0.0.1"
 
-        # Metadata for industries/functions
+        # Metadata for industries/functions/rating
         meta = metadata.get(skill_name, {})
         industries = meta.get("industries", [])
         functions = meta.get("functions", [])
+        rating = meta.get("rating", None)
         if not industries and not functions:
             print(f"  WARN {skill_name}: no industries/functions in metadata.json", file=sys.stderr)
 
@@ -698,6 +699,7 @@ def build_skills_array(parsed_skills, metadata, existing_skills=None):
             "installs": existing.get("installs", 0),
             "stars": existing.get("stars", 0),
             "badge": existing.get("badge", None),
+            "rating": rating,
             "version": version,
             "category": parsed["category"],
             "industries": industries,
