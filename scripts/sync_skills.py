@@ -447,7 +447,9 @@ def _parse_use_cases_table(rows):
         ask = row[0].strip().strip("\u201c\u201d\"'")
         returns = row[1].strip()
         # Skip header rows
-        if ask.lower() in ("your prompt", "prompt", "what you can ask"):
+        if ask.lower() in ("your prompt", "prompt", "what you can ask", "what you ask"):
+            continue
+        if returns.lower() in ("what you get", "you get", "output"):
             continue
         # Strip leading arrow
         returns = re.sub(r"^[\u2192\u2794→>]\s*", "", returns)
@@ -679,12 +681,18 @@ def build_skills_array(parsed_skills, metadata, existing_skills=None):
         if skill_id > max_id:
             max_id = skill_id
 
+        # Fall back to first sentence of long_description if description is empty
+        description = parsed["description"]
+        if not description and parsed["long_description"]:
+            first_sentence = re.split(r"(?<=[.!?])\s", parsed["long_description"])[0]
+            description = first_sentence[:200] if len(first_sentence) > 200 else first_sentence
+
         entry = {
             "id": skill_id,
             "slug": slug,
             "name": parsed["name"],
             "author": parsed["author"] or "Unknown",
-            "description": parsed["description"],
+            "description": description,
             "long_description": parsed["long_description"],
             "repo_url": existing.get("repo_url", None),
             "installs": existing.get("installs", 0),
