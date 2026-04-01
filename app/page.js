@@ -137,11 +137,11 @@ export default function DirectoryPage() {
 
           {showMaturity && (
             <div style={{ marginTop: 10, width: '100%', maxWidth: 860, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
-              {[1, 2, 3].map(level => (
+              {[3, 2, 1].map(level => (
                 <div key={level} style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 8, padding: '14px 16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                    <SignalBars rating={level} filled="#16a34a" empty="rgba(255,255,255,.2)" />
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#fb923c' }}>Level {level} — {RATING_LABELS[level]}</span>
+                    <SignalBars rating={level} />
+                    <span style={{ fontSize: 12, fontWeight: 700, color: RATING_COLOR[level] }}>Level {level} — {RATING_LABELS[level]}</span>
                   </div>
                   <p style={{ fontSize: 12, lineHeight: 1.65, color: '#d4d4d8', margin: 0 }}>{RATING_DESCRIPTIONS[level]}</p>
                 </div>
