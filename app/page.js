@@ -42,9 +42,9 @@ function RatingPill({ rating }) {
   const show = () => { clearTimeout(timerRef.current); setOpen(true); };
   const hide = () => { timerRef.current = setTimeout(() => setOpen(false), 120); };
   const getTooltipPos = () => {
-    if (!ref.current) return { top: 0, left: 0 };
+    if (!ref.current) return { top: 0, right: 0 };
     const r = ref.current.getBoundingClientRect();
-    return { top: r.bottom + 6, left: r.left };
+    return { top: r.bottom + 6, right: window.innerWidth - r.right };
   };
   const pos = open ? getTooltipPos() : {};
   return (
@@ -57,7 +57,7 @@ function RatingPill({ rating }) {
           background: '#fff', border: '1px solid #e4e4e7', borderRadius: 8,
           boxShadow: '0 8px 32px rgba(0,0,0,.18)', padding: '14px 16px',
           width: 280, textAlign: 'left',
-          top: pos.top, left: pos.left,
+          top: pos.top, right: pos.right,
         }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
             Maturity · Level {rating}/3
