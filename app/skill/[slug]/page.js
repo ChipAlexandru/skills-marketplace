@@ -5,20 +5,22 @@ import Link from 'next/link';
 import { getSkillBySlug } from '@/lib/data';
 
 /* ─── RATING PILL ─── */
-const RATING_LABELS = { 1: 'Functional', 2: 'Working draft', 3: 'Production-ready' };
+const RATING_LABELS = { 1: 'Starting point', 2: 'Working draft', 3: 'Production-ready' };
+const RATING_COLOR  = { 1: '#d97706', 2: '#2563eb', 3: '#16a34a' }; // amber / blue / green
 const RATING_DESCRIPTIONS = {
-  1: 'Functional, generic. The plugin produces substantive output that reflects real analytical work. However, the work is a midpoint rather than a near-final draft. The level of specificity and expert-level input is lacking. Output formatting can be improved. A senior practitioner can extract value, but the plugin likely needs customization and iteration before it is consistently useful.',
-  2: 'Professional working draft. The plugin produces well-structured output that is approximately 90% complete. A user with deep domain expertise would assess this as solid work that needs refinement. The remaining gaps require expert-level input and judgment.',
-  3: 'Production-ready. The plugin delivers finished work product in professional formats and handles edge cases gracefully. A user with deep domain expertise would assess this output as expert-level. This is the standard where you\'d be comfortable putting the output in front of a stakeholder with only light review.',
+  1: 'The plugin produces substantive output. However, the tasks are relatively simple, or work is a midpoint rather than a near-final draft. The level of specificity and expert-level input is lacking. The plugin needs customization and iteration before it is consistently useful.',
+  2: 'Produces well-structured output that is approximately 90% complete. A user with deep domain expertise would assess this as solid work, still needing refinement. The remaining gaps require expert-level input and judgment.',
+  3: "The plugin delivers finished work product on complex tasks and handles edge cases. A user with deep domain expertise would assess this output as expert-level. This is the standard where you'd be comfortable putting the output in front of a stakeholder with only light review.",
 };
 function SignalBars({ rating }) {
   const bars = [5, 9, 13];
   const w = 5, gap = 3, totalW = w * 3 + gap * 2, totalH = 13;
+  const filled = RATING_COLOR[rating] || '#d4d4d8';
   return (
     <svg width={totalW} height={totalH} viewBox={`0 0 ${totalW} ${totalH}`} style={{ display: 'block' }}>
       {bars.map((h, i) => (
         <rect key={i} x={i*(w+gap)} y={totalH-h} width={w} height={h} rx={1.5}
-          fill={i < rating ? '#16a34a' : '#d4d4d8'} />
+          fill={i < rating ? filled : '#e4e4e7'} />
       ))}
     </svg>
   );
@@ -27,7 +29,7 @@ function SignalBars({ rating }) {
 // No tooltip — description shown inline in the hero card
 function RatingDisplay({ rating }) {
   if (!rating) return null;
-  const color = rating === 3 ? '#15803d' : rating === 2 ? '#16a34a' : '#71717a';
+  const color = RATING_COLOR[rating] || '#71717a';
   return (
     <div>
       <div style={{ fontSize: 10, fontWeight: 700, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>Maturity</div>

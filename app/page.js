@@ -13,35 +13,36 @@ const ArrowIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="no
 const ChevronIcon = ({ open }) => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a1a1aa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' }}><polyline points="6 9 12 15 18 9"/></svg>;
 const CloseIcon = () => <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
 
-/* ─── RATING PILL ─── */
-const RATING_LABELS = { 1: 'Functional', 2: 'Working draft', 3: 'Production-ready' };
+/* ─── RATING ─── */
+const RATING_LABELS   = { 1: 'Starting point', 2: 'Working draft', 3: 'Production-ready' };
+const RATING_SUBLABEL = { 1: 'needs customization', 2: 'professional draft', 3: 'stakeholder-ready' };
+const RATING_COLOR    = { 1: '#d97706', 2: '#2563eb', 3: '#16a34a' }; // amber / blue / green
 const RATING_DESCRIPTIONS = {
-  1: 'Functional, generic. The plugin produces substantive output that reflects real analytical work. However, the work is a midpoint rather than a near-final draft. The level of specificity and expert-level input is lacking. Output formatting can be improved. A senior practitioner can extract value, but the plugin likely needs customization and iteration before it is consistently useful.',
-  2: 'Professional working draft. The plugin produces well-structured output that is approximately 90% complete. A user with deep domain expertise would assess this as solid work that needs refinement. The remaining gaps require expert-level input and judgment.',
-  3: 'Production-ready. The plugin delivers finished work product in professional formats and handles edge cases gracefully. A user with deep domain expertise would assess this output as expert-level. This is the standard where you\'d be comfortable putting the output in front of a stakeholder with only light review.',
+  1: 'The plugin produces substantive output. However, the tasks are relatively simple, or work is a midpoint rather than a near-final draft. The level of specificity and expert-level input is lacking. The plugin needs customization and iteration before it is consistently useful.',
+  2: 'Produces well-structured output that is approximately 90% complete. A user with deep domain expertise would assess this as solid work, still needing refinement. The remaining gaps require expert-level input and judgment.',
+  3: "The plugin delivers finished work product on complex tasks and handles edge cases. A user with deep domain expertise would assess this output as expert-level. This is the standard where you'd be comfortable putting the output in front of a stakeholder with only light review.",
 };
-// Signal bars: 3 bars of increasing height, filled up to rating
-function SignalBars({ rating, filled = '#16a34a', empty = '#d4d4d8' }) {
-  const bars = [5, 9, 13]; // heights
+
+function SignalBars({ rating }) {
+  const bars = [5, 9, 13];
   const w = 5, gap = 3, totalW = w * 3 + gap * 2, totalH = 13;
+  const filled = RATING_COLOR[rating] || '#d4d4d8';
   return (
-    <svg width={totalW} height={totalH} viewBox={`0 0 ${totalW} ${totalH}`} style={{ display: 'block' }}>
+    <svg width={totalW} height={totalH} viewBox={`0 0 ${totalW} ${totalH}`} style={{ display: 'block', flexShrink: 0 }}>
       {bars.map((h, i) => (
         <rect key={i} x={i*(w+gap)} y={totalH-h} width={w} height={h} rx={1.5}
-          fill={i < rating ? filled : empty} />
+          fill={i < rating ? filled : '#e4e4e7'} />
       ))}
     </svg>
   );
 }
 
-// Simple label — no tooltip
 function RatingPill({ rating }) {
   if (!rating) return null;
-  const color = rating === 3 ? '#15803d' : rating === 2 ? '#16a34a' : '#71717a';
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
       <SignalBars rating={rating} />
-      <span style={{ fontSize: 11, fontWeight: 600, color }}>{RATING_LABELS[rating]}</span>
+      <span style={{ fontSize: 11, fontWeight: 600, color: RATING_COLOR[rating] }}>{RATING_LABELS[rating]}</span>
     </div>
   );
 }
@@ -95,7 +96,7 @@ export default function DirectoryPage() {
     if (ind && !p.industries.includes(ind)) return false;
     if (fns.length && !fns.some(f => p.functions.includes(f))) return false;
     return true;
-  });
+  }).sort((a, b) => (b.rating || 0) - (a.rating || 0));
   const cnt = id => skills.filter(p => p.industries.includes(id)).length;
   const any = ind || fns.length;
 
