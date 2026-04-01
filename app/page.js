@@ -34,39 +34,14 @@ function SignalBars({ rating, filled = '#16a34a', empty = '#d4d4d8' }) {
   );
 }
 
+// Simple label — no tooltip
 function RatingPill({ rating }) {
-  const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState(null);
-  const timerRef = useRef(null);
-  const ref = useRef(null);
-  useEffect(() => {
-    if (open && ref.current) {
-      const r = ref.current.getBoundingClientRect();
-      setPos({ top: r.bottom + 8, right: window.innerWidth - r.right });
-    }
-  }, [open]);
   if (!rating) return null;
-  const show = () => { clearTimeout(timerRef.current); setOpen(true); };
-  const hide = () => { timerRef.current = setTimeout(() => setOpen(false), 120); setPos(null); };
+  const color = rating === 3 ? '#15803d' : rating === 2 ? '#16a34a' : '#71717a';
   return (
-    <div ref={ref} style={{ display: 'inline-flex', alignItems: 'center' }}
-      onMouseEnter={show} onMouseLeave={hide}>
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
       <SignalBars rating={rating} />
-      {open && pos && (
-        <div onMouseEnter={show} onMouseLeave={hide} style={{
-          position: 'fixed', top: pos.top, right: pos.right, zIndex: 9999,
-          background: '#fff', border: '1px solid #e4e4e7', borderRadius: 8,
-          boxShadow: '0 8px 32px rgba(0,0,0,.18)', padding: '14px 16px',
-          width: 240, textAlign: 'left',
-        }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
-            Maturity · Level {rating}/3
-          </div>
-          <p style={{ fontSize: 12.5, lineHeight: 1.65, color: '#52525b', margin: 0 }}>
-            {RATING_DESCRIPTIONS[rating]}
-          </p>
-        </div>
-      )}
+      <span style={{ fontSize: 11, fontWeight: 600, color }}>{RATING_LABELS[rating]}</span>
     </div>
   );
 }
@@ -91,7 +66,7 @@ function SkillCard({ skill, index }) {
             <span style={{ fontSize: 12, color: '#a1a1aa' }}>{skill.author}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
-            <RatingPill rating={skill.rating} size="sm" />
+            <RatingPill rating={skill.rating} />
             <span className="skill-card-arrow" style={{ color: '#d4d4d8', transition: 'color .15s' }}><ArrowIcon /></span>
           </div>
         </div>
@@ -111,6 +86,7 @@ export default function DirectoryPage() {
 
   const [showDetail, setShowDetail] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [showMaturity, setShowMaturity] = useState(false);
 
   const togFn = id => setFns(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
   const clear = () => { setInd(null); setFns([]); };
@@ -147,10 +123,30 @@ export default function DirectoryPage() {
             <span style={{ fontStyle: 'normal', fontWeight: 600 }}>Anthropic</span>
           </p>
 
-          <button onClick={() => setShowDetail(!showDetail)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: 0, border: 'none', background: 'transparent' }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: '#fb923c' }}>{showDetail ? 'Hide' : 'See'} example & how it works</span>
-            <ChevronIcon open={showDetail} />
-          </button>
+          <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+            <button onClick={() => setShowMaturity(!showMaturity)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: 0, border: 'none', background: 'transparent' }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: '#fb923c' }}>{showMaturity ? 'Hide' : 'What do the'} maturity ratings mean?</span>
+              <ChevronIcon open={showMaturity} />
+            </button>
+            <button onClick={() => setShowDetail(!showDetail)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: 0, border: 'none', background: 'transparent' }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: '#fb923c' }}>{showDetail ? 'Hide' : 'See'} example & how it works</span>
+              <ChevronIcon open={showDetail} />
+            </button>
+          </div>
+
+          {showMaturity && (
+            <div style={{ marginTop: 10, width: '100%', maxWidth: 860, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+              {[1, 2, 3].map(level => (
+                <div key={level} style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 8, padding: '14px 16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <SignalBars rating={level} filled="#16a34a" empty="rgba(255,255,255,.2)" />
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#fb923c' }}>Level {level} — {RATING_LABELS[level]}</span>
+                  </div>
+                  <p style={{ fontSize: 12, lineHeight: 1.65, color: '#d4d4d8', margin: 0 }}>{RATING_DESCRIPTIONS[level]}</p>
+                </div>
+              ))}
+            </div>
+          )}
 
           {showDetail && (
             <div style={{ marginTop: 10, width: '100%', maxWidth: 860 }}>

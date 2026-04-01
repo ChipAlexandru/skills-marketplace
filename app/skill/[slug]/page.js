@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getSkillBySlug } from '@/lib/data';
@@ -24,42 +24,18 @@ function SignalBars({ rating }) {
   );
 }
 
-function RatingPill({ rating }) {
-  const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState(null);
-  const timerRef = useRef(null);
-  const ref = useRef(null);
-  useEffect(() => {
-    if (open && ref.current) {
-      const r = ref.current.getBoundingClientRect();
-      setPos({ top: r.bottom + 8, right: window.innerWidth - r.right });
-    }
-  }, [open]);
+// No tooltip — description shown inline in the hero card
+function RatingDisplay({ rating }) {
   if (!rating) return null;
-  const show = () => { clearTimeout(timerRef.current); setOpen(true); };
-  const hide = () => { timerRef.current = setTimeout(() => setOpen(false), 120); setPos(null); };
+  const color = rating === 3 ? '#15803d' : rating === 2 ? '#16a34a' : '#71717a';
   return (
-    <div ref={ref} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
-      onMouseEnter={show} onMouseLeave={hide}>
-      <SignalBars rating={rating} />
-      <span style={{ fontSize: 12, fontWeight: 600, color: rating === 3 ? '#15803d' : rating === 2 ? '#16a34a' : '#71717a' }}>
-        {RATING_LABELS[rating]}
-      </span>
-      {open && pos && (
-        <div onMouseEnter={show} onMouseLeave={hide} style={{
-          position: 'fixed', top: pos.top, right: pos.right, zIndex: 9999,
-          background: '#fff', border: '1px solid #e4e4e7', borderRadius: 8,
-          boxShadow: '0 8px 32px rgba(0,0,0,.18)', padding: '14px 16px',
-          width: 300, textAlign: 'left',
-        }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
-            Maturity · Level {rating}/3
-          </div>
-          <p style={{ fontSize: 12.5, lineHeight: 1.65, color: '#52525b', margin: 0 }}>
-            {RATING_DESCRIPTIONS[rating]}
-          </p>
-        </div>
-      )}
+    <div>
+      <div style={{ fontSize: 10, fontWeight: 700, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>Maturity</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+        <SignalBars rating={rating} />
+        <span style={{ fontSize: 13, fontWeight: 600, color }}>{RATING_LABELS[rating]}</span>
+      </div>
+      <p style={{ fontSize: 12, lineHeight: 1.6, color: '#71717a', margin: 0, maxWidth: 260 }}>{RATING_DESCRIPTIONS[rating]}</p>
     </div>
   );
 }
@@ -151,12 +127,7 @@ export default function SkillDetailPage() {
               </div>
             )}
             </div>
-            {skill.rating && (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.06em' }}>Maturity</div>
-                <RatingPill rating={skill.rating} />
-              </div>
-            )}
+            {skill.rating && <RatingDisplay rating={skill.rating} />}
           </div>
           <p style={{ fontSize: 15, lineHeight: 1.75, color: '#52525b' }}>{skill.description}</p>
         </div>
