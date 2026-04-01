@@ -27,18 +27,11 @@ function SignalBars({ rating }) {
 function RatingPill({ rating }) {
   const [open, setOpen] = useState(false);
   const timerRef = useRef(null);
-  const ref = useRef(null);
   if (!rating) return null;
   const show = () => { clearTimeout(timerRef.current); setOpen(true); };
   const hide = () => { timerRef.current = setTimeout(() => setOpen(false), 120); };
-  const getPos = () => {
-    if (!ref.current) return { top: 0, right: 0 };
-    const r = ref.current.getBoundingClientRect();
-    return { top: r.bottom + 6, right: window.innerWidth - r.right };
-  };
-  const pos = open ? getPos() : {};
   return (
-    <div ref={ref} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+    <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6 }}
       onMouseEnter={show} onMouseLeave={hide}>
       <SignalBars rating={rating} />
       <span style={{ fontSize: 12, fontWeight: 600, color: rating === 3 ? '#15803d' : rating === 2 ? '#16a34a' : '#71717a' }}>
@@ -46,11 +39,10 @@ function RatingPill({ rating }) {
       </span>
       {open && (
         <div onMouseEnter={show} onMouseLeave={hide} style={{
-          position: 'fixed', zIndex: 9999,
+          position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 9999,
           background: '#fff', border: '1px solid #e4e4e7', borderRadius: 8,
           boxShadow: '0 8px 32px rgba(0,0,0,.18)', padding: '14px 16px',
           width: 300, textAlign: 'left',
-          top: pos.top, right: pos.right,
         }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
             Maturity · Level {rating}/3
