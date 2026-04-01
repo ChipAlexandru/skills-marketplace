@@ -22,27 +22,23 @@ const RATING_DESCRIPTIONS = {
 };
 function RatingPill({ rating, size = 'sm' }) {
   const [open, setOpen] = useState(false);
+  const timerRef = useRef(null);
   const ref = useRef(null);
-  useEffect(() => {
-    if (!open) return;
-    const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener('mousedown', handler);
-    document.addEventListener('touchstart', handler);
-    return () => { document.removeEventListener('mousedown', handler); document.removeEventListener('touchstart', handler); };
-  }, [open]);
   if (!rating) return null;
-  const filled = '#ea580c';
+  const filled = '#16a34a';
   const empty = '#e4e4e7';
   const segW = size === 'lg' ? 16 : 12;
   const segH = size === 'lg' ? 7 : 5;
   const gap = 2;
   const totalW = segW * 3 + gap * 2;
+  const show = () => { clearTimeout(timerRef.current); setOpen(true); };
+  const hide = () => { timerRef.current = setTimeout(() => setOpen(false), 100); };
   return (
-    <div ref={ref} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+    <div ref={ref} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}
+      onMouseEnter={show} onMouseLeave={hide}>
       <button
-        onClick={e => { e.preventDefault(); e.stopPropagation(); setOpen(o => !o); }}
-        title={RATING_LABELS[rating]}
-        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}
+        onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+        style={{ background: 'none', border: 'none', padding: 0, cursor: 'default', display: 'flex', alignItems: 'center', gap: 5 }}
       >
         <svg width={totalW} height={segH} viewBox={`0 0 ${totalW} ${segH}`}>
           {[0,1,2].map(i => (
@@ -50,18 +46,15 @@ function RatingPill({ rating, size = 'sm' }) {
               fill={i < rating ? filled : empty} />
           ))}
         </svg>
-        {size === 'lg' && (
-          <span style={{ fontSize: 11, fontWeight: 600, color: rating === 3 ? '#ea580c' : rating === 2 ? '#2563eb' : '#71717a' }}>
-            {RATING_LABELS[rating]}
-          </span>
-        )}
       </button>
       {open && (
-        <div style={{
-          position: 'absolute', top: size === 'lg' ? 28 : 22, right: 0, zIndex: 99,
+        <div onMouseEnter={show} onMouseLeave={hide} style={{
+          position: 'fixed', zIndex: 9999,
           background: '#fff', border: '1px solid #e4e4e7', borderRadius: 8,
-          boxShadow: '0 8px 24px rgba(0,0,0,.12)', padding: '14px 16px',
+          boxShadow: '0 8px 32px rgba(0,0,0,.18)', padding: '14px 16px',
           width: 280, textAlign: 'left',
+          top: ref.current ? ref.current.getBoundingClientRect().bottom + 6 : 0,
+          right: ref.current ? window.innerWidth - ref.current.getBoundingClientRect().right : 0,
         }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
             Maturity · Level {rating}/3

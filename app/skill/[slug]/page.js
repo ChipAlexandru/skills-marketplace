@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getSkillBySlug } from '@/lib/data';
@@ -13,38 +13,36 @@ const RATING_DESCRIPTIONS = {
 };
 function RatingPill({ rating }) {
   const [open, setOpen] = useState(false);
+  const timerRef = useRef(null);
   const ref = useRef(null);
-  useEffect(() => {
-    if (!open) return;
-    const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener('mousedown', handler);
-    document.addEventListener('touchstart', handler);
-    return () => { document.removeEventListener('mousedown', handler); document.removeEventListener('touchstart', handler); };
-  }, [open]);
   if (!rating) return null;
-  const filled = '#ea580c';
+  const filled = '#16a34a';
   const empty = '#e4e4e7';
+  const show = () => { clearTimeout(timerRef.current); setOpen(true); };
+  const hide = () => { timerRef.current = setTimeout(() => setOpen(false), 100); };
   return (
-    <div ref={ref} style={{ position: 'relative', display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+    <div ref={ref} style={{ position: 'relative', display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-end' }}
+      onMouseEnter={show} onMouseLeave={hide}>
       <button
-        onClick={() => setOpen(o => !o)}
-        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+        style={{ background: 'none', border: 'none', padding: 0, cursor: 'default', display: 'flex', alignItems: 'center', gap: 6 }}
       >
         <svg width={54} height={7} viewBox="0 0 54 7">
           {[0,1,2].map(i => (
             <rect key={i} x={i*18} y={0} width={16} height={7} rx={3.5} fill={i < rating ? filled : empty} />
           ))}
         </svg>
-        <span style={{ fontSize: 12, fontWeight: 600, color: rating === 3 ? '#ea580c' : rating === 2 ? '#2563eb' : '#71717a' }}>
+        <span style={{ fontSize: 12, fontWeight: 600, color: rating === 3 ? '#15803d' : rating === 2 ? '#16a34a' : '#71717a' }}>
           {RATING_LABELS[rating]}
         </span>
       </button>
       {open && (
-        <div style={{
-          position: 'absolute', top: 30, right: 0, zIndex: 99,
+        <div onMouseEnter={show} onMouseLeave={hide} style={{
+          position: 'fixed', zIndex: 9999,
           background: '#fff', border: '1px solid #e4e4e7', borderRadius: 8,
-          boxShadow: '0 8px 24px rgba(0,0,0,.12)', padding: '14px 16px',
+          boxShadow: '0 8px 32px rgba(0,0,0,.18)', padding: '14px 16px',
           width: 300, textAlign: 'left',
+          top: ref.current ? ref.current.getBoundingClientRect().bottom + 6 : 0,
+          right: ref.current ? window.innerWidth - ref.current.getBoundingClientRect().right : 0,
         }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
             Maturity · Level {rating}/3
