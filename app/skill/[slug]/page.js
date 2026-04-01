@@ -24,6 +24,10 @@ function CopyBtn({ text }) {
   );
 }
 
+function SectionHeading({ children }) {
+  return <h2 style={{ fontSize: 13, fontWeight: 700, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 12 }}>{children}</h2>;
+}
+
 export default function SkillDetailPage() {
   const params = useParams();
   const skill = getSkillBySlug(params.slug);
@@ -31,6 +35,9 @@ export default function SkillDetailPage() {
   if (!skill) return <div style={{ padding: '100px 0', textAlign: 'center', color: '#a1a1aa' }}>Skill not found.</div>;
 
   const useCases = skill.use_cases || [];
+  const inputs = skill.inputs || [];
+  const outputs = skill.outputs || [];
+  const howItWorks = skill.how_it_works || [];
   const installCmd = `/plugin install ${skill.slug}`;
 
   return (
@@ -41,22 +48,35 @@ export default function SkillDetailPage() {
           <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#fb923c', fontSize: 12, fontWeight: 500, textDecoration: 'none', marginBottom: 20 }}>
             <BackIcon /> Back to directory
           </Link>
-          <div style={{ fontSize: 12, color: '#a1a1aa', marginBottom: 6 }}>{skill.author} &middot; {skill.installs} installs</div>
+
+          {/* META ROW */}
+          <div style={{ display: 'flex', gap: 24, fontSize: 12, color: '#a1a1aa', marginBottom: 8 }}>
+            {skill.version && <span><span style={{ color: '#71717a' }}>Version</span> <span style={{ color: '#d4d4d8', fontWeight: 600 }}>{skill.version}</span></span>}
+            <span><span style={{ color: '#71717a' }}>Publisher</span> <span style={{ color: '#d4d4d8', fontWeight: 600 }}>{skill.author}</span></span>
+            {skill.category && <span><span style={{ color: '#71717a' }}>Category</span> <span style={{ color: '#d4d4d8', fontWeight: 600 }}>{skill.category}</span></span>}
+          </div>
+
           <h1 style={{ fontSize: 28, fontWeight: 700, color: '#fff', marginBottom: 10, letterSpacing: '-.02em' }}>{skill.name}</h1>
-          <p style={{ fontSize: 15, lineHeight: 1.7, color: '#e8cdb5', maxWidth: 600 }}>{skill.long_description || skill.description}</p>
+          <p style={{ fontSize: 14, lineHeight: 1.7, color: '#e8cdb5', maxWidth: 680 }}>{skill.description}</p>
         </div>
       </div>
 
       {/* BODY */}
       <div style={{ maxWidth: 860, margin: '0 auto', padding: '28px 36px 60px' }}>
 
-        {/* USE CASES */}
+        {/* WHAT IT DOES */}
+        <section style={{ marginBottom: 32, animation: 'fadeUp .3s ease both' }}>
+          <SectionHeading>What it does</SectionHeading>
+          <p style={{ fontSize: 14, lineHeight: 1.75, color: '#52525b' }}>{skill.long_description || skill.description}</p>
+        </section>
+
+        {/* WHAT YOU CAN ASK */}
         {useCases.length > 0 && (
-          <section style={{ marginBottom: 28 }}>
-            <h2 style={{ fontSize: 15, fontWeight: 700, color: '#18181b', marginBottom: 14 }}>What you can ask</h2>
+          <section style={{ marginBottom: 32, animation: 'fadeUp .3s ease .06s both' }}>
+            <SectionHeading>What you can ask</SectionHeading>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {useCases.map((uc, i) => (
-                <div key={i} style={{ background: '#fff', border: '1px solid #e4e4e7', borderRadius: 8, padding: '16px 20px', animation: `fadeUp .3s ease ${i * .06}s both` }}>
+                <div key={i} style={{ background: '#fff', border: '1px solid #e4e4e7', borderRadius: 8, padding: '16px 20px' }}>
                   <p style={{ fontSize: 13.5, fontWeight: 600, color: '#18181b', lineHeight: 1.5, marginBottom: 8 }}>&ldquo;{uc.ask}&rdquo;</p>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
                     <span style={{ flexShrink: 0, marginTop: 1 }}><OrangeArrow /></span>
@@ -68,8 +88,76 @@ export default function SkillDetailPage() {
           </section>
         )}
 
+        {/* INPUTS */}
+        {inputs.length > 0 && (
+          <section style={{ marginBottom: 32, animation: 'fadeUp .3s ease .12s both' }}>
+            <SectionHeading>Inputs</SectionHeading>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {inputs.map((inp, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'baseline', gap: 10, padding: '10px 16px', background: '#fff', border: '1px solid #e4e4e7', borderRadius: 8 }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#18181b', whiteSpace: 'nowrap' }}>{inp.label}</span>
+                  {!inp.required && <span style={{ fontSize: 10, fontWeight: 600, color: '#a1a1aa', background: '#f4f4f5', padding: '1px 6px', borderRadius: 3, whiteSpace: 'nowrap' }}>optional</span>}
+                  <span style={{ fontSize: 12.5, color: '#71717a', lineHeight: 1.5 }}>{inp.detail}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* OUTPUT */}
+        {outputs.length > 0 && (
+          <section style={{ marginBottom: 32, animation: 'fadeUp .3s ease .18s both' }}>
+            <SectionHeading>Output</SectionHeading>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {outputs.map((out, i) => (
+                <div key={i} style={{ padding: '14px 18px', background: '#fff', border: '1px solid #e4e4e7', borderLeft: '3px solid #fb923c', borderRadius: 8 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#18181b', marginBottom: 4 }}>{out.label}</div>
+                  <p style={{ fontSize: 12.5, lineHeight: 1.6, color: '#71717a' }}>{out.detail}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* TOOLS & INTEGRATIONS */}
+        {skill.tools && (
+          <section style={{ marginBottom: 32, animation: 'fadeUp .3s ease .24s both' }}>
+            <SectionHeading>Tools & Integrations</SectionHeading>
+            <p style={{ fontSize: 13.5, lineHeight: 1.7, color: '#52525b' }}>{skill.tools}</p>
+          </section>
+        )}
+
+        {/* HOW IT WORKS */}
+        {howItWorks.length > 0 && (
+          <section style={{ marginBottom: 32, animation: 'fadeUp .3s ease .3s both' }}>
+            <SectionHeading>How it works</SectionHeading>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {howItWorks.map((step, i) => (
+                <div key={i} style={{ display: 'flex', gap: 14, padding: '16px 18px', background: '#fff', border: '1px solid #e4e4e7', borderRadius: 8 }}>
+                  <span style={{
+                    width: 28, height: 28, borderRadius: 14, background: '#1a1a1a', color: '#fb923c',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0,
+                  }}>{i + 1}</span>
+                  <div>
+                    <div style={{ fontSize: 13.5, fontWeight: 700, color: '#18181b', marginBottom: 4 }}>{step.title}</div>
+                    <p style={{ fontSize: 12.5, lineHeight: 1.65, color: '#71717a' }}>{step.detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* SKILLS SUMMARY */}
+        {skill.skills_summary && (
+          <section style={{ marginBottom: 32, animation: 'fadeUp .3s ease .36s both' }}>
+            <SectionHeading>Skills</SectionHeading>
+            <p style={{ fontSize: 13.5, lineHeight: 1.7, color: '#52525b' }}>{skill.skills_summary}</p>
+          </section>
+        )}
+
         {/* INSTALL + GITHUB */}
-        <section style={{ display: 'flex', gap: 14, animation: 'fadeUp .35s ease .25s both' }}>
+        <section style={{ display: 'flex', gap: 14, animation: 'fadeUp .35s ease .4s both' }}>
           <div style={{ flex: 1, background: '#fff', border: '1px solid #e4e4e7', borderRadius: 8, padding: '16px 18px' }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#18181b', marginBottom: 10 }}>Install</div>
             <div style={{ fontSize: 11, color: '#a1a1aa', marginBottom: 4 }}>In Cowork</div>
