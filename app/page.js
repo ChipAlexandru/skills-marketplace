@@ -14,7 +14,7 @@ const ChevronIcon = ({ open }) => <svg width="14" height="14" viewBox="0 0 24 24
 const CloseIcon = () => <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
 
 /* ─── RATING ─── */
-const RATING_LABELS   = { 1: 'Starting point', 2: 'Working draft', 3: 'Production-ready' };
+const RATING_LABELS   = { 1: 'Starting point', 2: 'Professional draft', 3: 'Production-ready' };
 const RATING_SUBLABEL = { 1: 'needs customization', 2: 'professional draft', 3: 'stakeholder-ready' };
 const RATING_COLOR    = { 1: '#d97706', 2: '#2563eb', 3: '#16a34a' }; // amber / blue / green
 const RATING_DESCRIPTIONS = {

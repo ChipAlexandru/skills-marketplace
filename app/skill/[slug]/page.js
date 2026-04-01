@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { getSkillBySlug } from '@/lib/data';
 
 /* ─── RATING PILL ─── */
-const RATING_LABELS = { 1: 'Starting point', 2: 'Working draft', 3: 'Production-ready' };
+const RATING_LABELS = { 1: 'Starting point', 2: 'Professional draft', 3: 'Production-ready' };
 const RATING_COLOR  = { 1: '#d97706', 2: '#2563eb', 3: '#16a34a' }; // amber / blue / green
 const RATING_DESCRIPTIONS = {
   1: 'The plugin produces substantive output. However, the tasks are relatively simple, or work is a midpoint rather than a near-final draft. The level of specificity and expert-level input is lacking. The plugin needs customization and iteration before it is consistently useful.',
