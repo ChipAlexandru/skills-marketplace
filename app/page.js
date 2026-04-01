@@ -36,17 +36,25 @@ function SignalBars({ rating, filled = '#16a34a', empty = '#d4d4d8' }) {
 
 function RatingPill({ rating }) {
   const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState(null);
   const timerRef = useRef(null);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (open && ref.current) {
+      const r = ref.current.getBoundingClientRect();
+      setPos({ top: r.bottom + 8, right: window.innerWidth - r.right });
+    }
+  }, [open]);
   if (!rating) return null;
   const show = () => { clearTimeout(timerRef.current); setOpen(true); };
-  const hide = () => { timerRef.current = setTimeout(() => setOpen(false), 120); };
+  const hide = () => { timerRef.current = setTimeout(() => setOpen(false), 120); setPos(null); };
   return (
-    <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}
+    <div ref={ref} style={{ display: 'inline-flex', alignItems: 'center' }}
       onMouseEnter={show} onMouseLeave={hide}>
       <SignalBars rating={rating} />
-      {open && (
+      {open && pos && (
         <div onMouseEnter={show} onMouseLeave={hide} style={{
-          position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 9999,
+          position: 'fixed', top: pos.top, right: pos.right, zIndex: 9999,
           background: '#fff', border: '1px solid #e4e4e7', borderRadius: 8,
           boxShadow: '0 8px 32px rgba(0,0,0,.18)', padding: '14px 16px',
           width: 240, textAlign: 'left',

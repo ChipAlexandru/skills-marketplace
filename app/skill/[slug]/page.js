@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getSkillBySlug } from '@/lib/data';
@@ -26,20 +26,28 @@ function SignalBars({ rating }) {
 
 function RatingPill({ rating }) {
   const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState(null);
   const timerRef = useRef(null);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (open && ref.current) {
+      const r = ref.current.getBoundingClientRect();
+      setPos({ top: r.bottom + 8, right: window.innerWidth - r.right });
+    }
+  }, [open]);
   if (!rating) return null;
   const show = () => { clearTimeout(timerRef.current); setOpen(true); };
-  const hide = () => { timerRef.current = setTimeout(() => setOpen(false), 120); };
+  const hide = () => { timerRef.current = setTimeout(() => setOpen(false), 120); setPos(null); };
   return (
-    <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+    <div ref={ref} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
       onMouseEnter={show} onMouseLeave={hide}>
       <SignalBars rating={rating} />
       <span style={{ fontSize: 12, fontWeight: 600, color: rating === 3 ? '#15803d' : rating === 2 ? '#16a34a' : '#71717a' }}>
         {RATING_LABELS[rating]}
       </span>
-      {open && (
+      {open && pos && (
         <div onMouseEnter={show} onMouseLeave={hide} style={{
-          position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 9999,
+          position: 'fixed', top: pos.top, right: pos.right, zIndex: 9999,
           background: '#fff', border: '1px solid #e4e4e7', borderRadius: 8,
           boxShadow: '0 8px 32px rgba(0,0,0,.18)', padding: '14px 16px',
           width: 300, textAlign: 'left',
