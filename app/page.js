@@ -20,41 +20,44 @@ const RATING_DESCRIPTIONS = {
   2: 'Professional working draft. The plugin produces well-structured output that is approximately 90% complete. A user with deep domain expertise would assess this as solid work that needs refinement. The remaining gaps require expert-level input and judgment.',
   3: 'Production-ready. The plugin delivers finished work product in professional formats and handles edge cases gracefully. A user with deep domain expertise would assess this output as expert-level. This is the standard where you\'d be comfortable putting the output in front of a stakeholder with only light review.',
 };
-function RatingPill({ rating, size = 'sm' }) {
+// Signal bars: 3 bars of increasing height, filled up to rating
+function SignalBars({ rating, filled = '#16a34a', empty = '#d4d4d8' }) {
+  const bars = [5, 9, 13]; // heights
+  const w = 5, gap = 3, totalW = w * 3 + gap * 2, totalH = 13;
+  return (
+    <svg width={totalW} height={totalH} viewBox={`0 0 ${totalW} ${totalH}`} style={{ display: 'block' }}>
+      {bars.map((h, i) => (
+        <rect key={i} x={i*(w+gap)} y={totalH-h} width={w} height={h} rx={1.5}
+          fill={i < rating ? filled : empty} />
+      ))}
+    </svg>
+  );
+}
+
+function RatingPill({ rating }) {
   const [open, setOpen] = useState(false);
   const timerRef = useRef(null);
   const ref = useRef(null);
   if (!rating) return null;
-  const filled = '#16a34a';
-  const empty = '#e4e4e7';
-  const segW = size === 'lg' ? 16 : 12;
-  const segH = size === 'lg' ? 7 : 5;
-  const gap = 2;
-  const totalW = segW * 3 + gap * 2;
   const show = () => { clearTimeout(timerRef.current); setOpen(true); };
-  const hide = () => { timerRef.current = setTimeout(() => setOpen(false), 100); };
+  const hide = () => { timerRef.current = setTimeout(() => setOpen(false), 120); };
+  const getTooltipPos = () => {
+    if (!ref.current) return { top: 0, left: 0 };
+    const r = ref.current.getBoundingClientRect();
+    return { top: r.bottom + 6, left: r.left };
+  };
+  const pos = open ? getTooltipPos() : {};
   return (
-    <div ref={ref} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}
+    <div ref={ref} style={{ display: 'inline-flex', alignItems: 'center' }}
       onMouseEnter={show} onMouseLeave={hide}>
-      <button
-        onClick={e => { e.preventDefault(); e.stopPropagation(); }}
-        style={{ background: 'none', border: 'none', padding: 0, cursor: 'default', display: 'flex', alignItems: 'center', gap: 5 }}
-      >
-        <svg width={totalW} height={segH} viewBox={`0 0 ${totalW} ${segH}`}>
-          {[0,1,2].map(i => (
-            <rect key={i} x={i*(segW+gap)} y={0} width={segW} height={segH} rx={segH/2}
-              fill={i < rating ? filled : empty} />
-          ))}
-        </svg>
-      </button>
+      <SignalBars rating={rating} />
       {open && (
         <div onMouseEnter={show} onMouseLeave={hide} style={{
           position: 'fixed', zIndex: 9999,
           background: '#fff', border: '1px solid #e4e4e7', borderRadius: 8,
           boxShadow: '0 8px 32px rgba(0,0,0,.18)', padding: '14px 16px',
           width: 280, textAlign: 'left',
-          top: ref.current ? ref.current.getBoundingClientRect().bottom + 6 : 0,
-          right: ref.current ? window.innerWidth - ref.current.getBoundingClientRect().right : 0,
+          top: pos.top, left: pos.left,
         }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
             Maturity · Level {rating}/3
