@@ -105,11 +105,23 @@ export default function DirectoryPage() {
       <style>{`
         .skill-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.06); transform: translateY(-1px); }
         .skill-card:hover .skill-card-arrow { color: #c2410c !important; }
+        @media (max-width: 640px) {
+          .page-body { flex-direction: column !important; padding: 12px 16px 40px !important; }
+          .page-sidebar { width: 100% !important; position: static !important; display: flex; flex-wrap: wrap; gap: 6px; }
+          .page-sidebar p { width: 100%; margin-bottom: 4px !important; }
+          .page-sidebar button { width: auto !important; padding: 5px 12px !important; border-radius: 20px !important; border: 1px solid #e4e4e7 !important; background: #fff !important; }
+          .page-sidebar button span:first-child { display: none; }
+          .page-sidebar button .sidebar-active { background: #fff7ed !important; border-color: #fb923c !important; }
+          .page-card-grid { grid-template-columns: 1fr !important; }
+          .page-header-inner { padding: 12px 16px 16px !important; }
+          .page-nav { padding: 14px 16px 0 !important; }
+          .page-quote { font-size: 14px !important; }
+        }
       `}</style>
 
       {/* HEADER */}
       <div style={{ background: 'linear-gradient(160deg,#0f0f0f 0%,#1a1a1a 30%,#8b2500 100%)', color: '#fff' }}>
-        <nav style={{ maxWidth: 1140, margin: '0 auto', padding: '18px 36px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <nav className="page-nav" style={{ maxWidth: 1140, margin: '0 auto', padding: '18px 36px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: 24, fontWeight: 700, color: '#fff', letterSpacing: '-.02em' }}>Business Skills for Claude Cowork</span>
           <div style={{ display: 'flex', gap: 24 }}>
             <button onClick={() => setShowAbout(true)} style={{ fontSize: 13, fontWeight: 500, color: '#fb923c', background: 'none', border: 'none' }}>About</button>
@@ -117,9 +129,9 @@ export default function DirectoryPage() {
         </nav>
 
 
-        <div style={{ maxWidth: 1140, margin: '0 auto', padding: '14px 36px 22px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+        <div className="page-header-inner" style={{ maxWidth: 1140, margin: '0 auto', padding: '14px 36px 22px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
 
-          <p style={{ fontSize: 18, fontStyle: 'italic', color: '#a1a1aa', textAlign: 'right', marginBottom: 18, lineHeight: 1.5 }}>
+          <p className="page-quote" style={{ fontSize: 18, fontStyle: 'italic', color: '#a1a1aa', textAlign: 'right', marginBottom: 18, lineHeight: 1.5 }}>
             "Turn expertise, procedures, and best practices into reusable capabilities so Claude can apply them automatically, every time."<br />
             <span style={{ fontStyle: 'normal', fontWeight: 600 }}>Anthropic</span>
           </p>
@@ -179,9 +191,9 @@ export default function DirectoryPage() {
       </div>
 
       {/* BODY */}
-      <div style={{ maxWidth: 1140, margin: '0 auto', padding: '16px 36px 60px', display: 'flex', gap: 36, alignItems: 'flex-start' }}>
+      <div className="page-body" style={{ maxWidth: 1140, margin: '0 auto', padding: '16px 36px 60px', display: 'flex', gap: 36, alignItems: 'flex-start' }}>
         {/* SIDEBAR */}
-        <aside style={{ width: 220, flexShrink: 0, position: 'sticky', top: 24 }}>
+        <aside className="page-sidebar" style={{ width: 220, flexShrink: 0, position: 'sticky', top: 24 }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 10, paddingLeft: 10 }}>Industry</p>
           {(() => {
             const active = vis.filter(i => cnt(i.id) > 0).sort((a, b) => cnt(b.id) - cnt(a.id));
@@ -238,7 +250,7 @@ export default function DirectoryPage() {
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 14 }}>
+          <div className="page-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 14 }}>
             {res.map((p, i) => <SkillCard key={p.id} skill={p} index={i} />)}
           </div>
 
