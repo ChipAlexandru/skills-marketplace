@@ -98,7 +98,7 @@ export default function DirectoryPage() {
     return true;
   }).sort((a, b) => (b.rating || 0) - (a.rating || 0));
   const cnt = id => skills.filter(p => p.industries.includes(id)).length;
-  const any = ind || fns.length;
+  const any = !!(ind || fns.length);
 
   return (
     <div style={{ minHeight: '100vh' }}>
