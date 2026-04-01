@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { getSkills } from '@/lib/data';
 import { INDUSTRIES, FUNCTIONS, BADGE_COLORS } from '@/lib/constants';
@@ -12,6 +12,68 @@ const DownloadIcon = () => <svg width="13" height="13" viewBox="0 0 24 24" fill=
 const ArrowIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>;
 const ChevronIcon = ({ open }) => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a1a1aa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' }}><polyline points="6 9 12 15 18 9"/></svg>;
 const CloseIcon = () => <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
+
+/* ─── RATING PILL ─── */
+const RATING_LABELS = { 1: 'Functional', 2: 'Working draft', 3: 'Production-ready' };
+const RATING_DESCRIPTIONS = {
+  1: 'Functional, generic. The plugin produces substantive output that reflects real analytical work. However, the work is a midpoint rather than a near-final draft. The level of specificity and expert-level input is lacking. Output formatting can be improved. A senior practitioner can extract value, but the plugin likely needs customization and iteration before it is consistently useful.',
+  2: 'Professional working draft. The plugin produces well-structured output that is approximately 90% complete. A user with deep domain expertise would assess this as solid work that needs refinement. The remaining gaps require expert-level input and judgment.',
+  3: 'Production-ready. The plugin delivers finished work product in professional formats and handles edge cases gracefully. A user with deep domain expertise would assess this output as expert-level. This is the standard where you\'d be comfortable putting the output in front of a stakeholder with only light review.',
+};
+function RatingPill({ rating, size = 'sm' }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler);
+    return () => { document.removeEventListener('mousedown', handler); document.removeEventListener('touchstart', handler); };
+  }, [open]);
+  if (!rating) return null;
+  const filled = '#ea580c';
+  const empty = '#e4e4e7';
+  const segW = size === 'lg' ? 16 : 12;
+  const segH = size === 'lg' ? 7 : 5;
+  const gap = 2;
+  const totalW = segW * 3 + gap * 2;
+  return (
+    <div ref={ref} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+      <button
+        onClick={e => { e.preventDefault(); e.stopPropagation(); setOpen(o => !o); }}
+        title={RATING_LABELS[rating]}
+        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}
+      >
+        <svg width={totalW} height={segH} viewBox={`0 0 ${totalW} ${segH}`}>
+          {[0,1,2].map(i => (
+            <rect key={i} x={i*(segW+gap)} y={0} width={segW} height={segH} rx={segH/2}
+              fill={i < rating ? filled : empty} />
+          ))}
+        </svg>
+        {size === 'lg' && (
+          <span style={{ fontSize: 11, fontWeight: 600, color: rating === 3 ? '#ea580c' : rating === 2 ? '#2563eb' : '#71717a' }}>
+            {RATING_LABELS[rating]}
+          </span>
+        )}
+      </button>
+      {open && (
+        <div style={{
+          position: 'absolute', top: size === 'lg' ? 28 : 22, right: 0, zIndex: 99,
+          background: '#fff', border: '1px solid #e4e4e7', borderRadius: 8,
+          boxShadow: '0 8px 24px rgba(0,0,0,.12)', padding: '14px 16px',
+          width: 280, textAlign: 'left',
+        }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
+            Maturity · Level {rating}/3
+          </div>
+          <p style={{ fontSize: 12.5, lineHeight: 1.65, color: '#52525b', margin: 0 }}>
+            {RATING_DESCRIPTIONS[rating]}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 /* ─── SKILL CARD ─── */
 function SkillCard({ skill, index }) {
@@ -32,7 +94,10 @@ function SkillCard({ skill, index }) {
             </div>
             <span style={{ fontSize: 12, color: '#a1a1aa' }}>{skill.author}</span>
           </div>
-          <span className="skill-card-arrow" style={{ color: '#d4d4d8', transition: 'color .15s', marginTop: 4 }}><ArrowIcon /></span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+            <RatingPill rating={skill.rating} size="sm" />
+            <span className="skill-card-arrow" style={{ color: '#d4d4d8', transition: 'color .15s' }}><ArrowIcon /></span>
+          </div>
         </div>
         <p style={{ fontSize: 13.5, lineHeight: 1.65, color: '#52525b', margin: 0, flex: 1 }}>{skill.description}</p>
         <div style={{ display: 'flex', gap: 12, paddingTop: 8, borderTop: '1px solid #f4f4f5' }}>
@@ -47,13 +112,13 @@ function SkillCard({ skill, index }) {
 export default function DirectoryPage() {
   const [ind, setInd] = useState(null);
   const [fns, setFns] = useState([]);
-  const [more, setMore] = useState(false);
+
   const [showDetail, setShowDetail] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
 
   const togFn = id => setFns(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
   const clear = () => { setInd(null); setFns([]); };
-  const vis = more ? INDUSTRIES : INDUSTRIES.filter(i => !i.extra);
+  const vis = INDUSTRIES;
   const res = skills.filter(p => {
     if (ind && !p.industries.includes(ind)) return false;
     if (fns.length && !fns.some(f => p.functions.includes(f))) return false;
@@ -66,7 +131,7 @@ export default function DirectoryPage() {
     <div style={{ minHeight: '100vh' }}>
       <style>{`
         .skill-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.06); transform: translateY(-1px); }
-        .skill-card:hover .skill-card-arrow { color: #4f46e5 !important; }
+        .skill-card:hover .skill-card-arrow { color: #c2410c !important; }
       `}</style>
 
       {/* HEADER */}
@@ -78,16 +143,13 @@ export default function DirectoryPage() {
           </div>
         </nav>
 
-        <div style={{ maxWidth: 1140, margin: '0 auto', padding: '2px 36px 0' }}>
-          <p style={{ fontSize: 12.5, lineHeight: 1.7, color: '#a1a1aa' }}>
-            <span style={{ fontFamily: 'Georgia, serif', fontSize: 15, fontWeight: 700, fontStyle: 'italic', color: '#d4d4d8', marginRight: 5 }}>skill</span>
-            <span style={{ fontSize: 10.5, color: '#fb923c', fontWeight: 600, fontStyle: 'italic', marginRight: 8 }}>noun:</span>
-            reusable expertise that AI agents draw on to get work done.
-          </p>
-        </div>
 
-        <div style={{ maxWidth: 1140, margin: '0 auto', padding: '14px 36px 22px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-          <p style={{ fontSize: 24, fontWeight: 700, color: '#e8cdb5', letterSpacing: '-.02em', marginBottom: 18 }}>Curated. Tested. Ready to use.</p>
+        <div style={{ maxWidth: 1140, margin: '0 auto', padding: '14px 36px 22px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+
+          <p style={{ fontSize: 18, fontStyle: 'italic', color: '#a1a1aa', textAlign: 'right', marginBottom: 18, lineHeight: 1.5 }}>
+            "Turn expertise, procedures, and best practices into reusable capabilities so Claude can apply them automatically, every time."<br />
+            <span style={{ fontStyle: 'normal', fontWeight: 600 }}>Anthropic</span>
+          </p>
 
           <button onClick={() => setShowDetail(!showDetail)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: 0, border: 'none', background: 'transparent' }}>
             <span style={{ fontSize: 12, fontWeight: 600, color: '#fb923c' }}>{showDetail ? 'Hide' : 'See'} example & how it works</span>
@@ -128,24 +190,28 @@ export default function DirectoryPage() {
         {/* SIDEBAR */}
         <aside style={{ width: 220, flexShrink: 0, position: 'sticky', top: 24 }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 10, paddingLeft: 10 }}>Industry</p>
-          <button onClick={() => setInd(null)} style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '8px 10px', borderRadius: 7, border: 'none', background: !ind ? '#ede9fe' : 'transparent' }}>
-            <span style={{ flex: 1, fontSize: 13.5, fontWeight: !ind ? 600 : 400, color: !ind ? '#4f46e5' : '#71717a', textAlign: 'left' }}>All industries</span>
-            <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: !ind ? '#7c3aed' : '#d4d4d8' }}>{skills.length}</span>
-          </button>
-          {vis.map(item => {
-            const a = ind === item.id; const c = cnt(item.id);
+          {(() => {
+            const active = vis.filter(i => cnt(i.id) > 0).sort((a, b) => cnt(b.id) - cnt(a.id));
+            const inactive = vis.filter(i => cnt(i.id) === 0);
             return (
-              <button key={item.id} onClick={() => setInd(a ? null : item.id)} style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '8px 10px', borderRadius: 7, border: 'none', background: a ? '#ede9fe' : 'transparent', opacity: c ? 1 : .35, marginTop: 1 }}>
-                <span style={{ width: 6, height: 6, borderRadius: 3, background: item.color, marginRight: 8, flexShrink: 0 }} />
-                <span style={{ flex: 1, fontSize: 13.5, fontWeight: a ? 600 : 400, color: a ? '#4f46e5' : '#52525b', textAlign: 'left' }}>{item.label}</span>
-                <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: a ? '#7c3aed' : '#d4d4d8' }}>{c}</span>
-              </button>
+              <>
+                <button onClick={() => setInd(null)} style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '8px 10px', borderRadius: 7, border: 'none', background: !ind ? '#fff7ed' : 'transparent' }}>
+                  <span style={{ flex: 1, fontSize: 13.5, fontWeight: !ind ? 600 : 400, color: !ind ? '#c2410c' : '#71717a', textAlign: 'left' }}>All industries</span>
+                  <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: !ind ? '#ea580c' : '#d4d4d8' }}>{skills.length}</span>
+                </button>
+                {active.map(item => {
+                  const a = ind === item.id; const c = cnt(item.id);
+                  return (
+                    <button key={item.id} onClick={() => setInd(a ? null : item.id)} style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '8px 10px', borderRadius: 7, border: 'none', background: a ? '#fff7ed' : 'transparent', cursor: 'pointer', marginTop: 1 }}>
+                      <span style={{ width: 6, height: 6, borderRadius: 3, background: item.color, marginRight: 8, flexShrink: 0 }} />
+                      <span style={{ flex: 1, fontSize: 13.5, fontWeight: a ? 600 : 400, color: a ? '#c2410c' : '#18181b', textAlign: 'left' }}>{item.label}</span>
+                      <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: a ? '#ea580c' : '#a1a1aa' }}>{c}</span>
+                    </button>
+                  );
+                })}
+              </>
             );
-          })}
-          <button onClick={() => setMore(!more)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '8px 10px', border: 'none', background: 'transparent', width: '100%', marginTop: 2 }}>
-            <span style={{ fontSize: 13, color: '#a1a1aa' }}>{more ? 'Show fewer' : `+${INDUSTRIES.filter(i => i.extra).length} more`}</span>
-            <ChevronIcon open={more} />
-          </button>
+          })()}
         </aside>
 
         {/* MAIN */}
@@ -155,9 +221,10 @@ export default function DirectoryPage() {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
               {FUNCTIONS.map(fn => {
                 const a = fns.includes(fn.id);
+                const hasSkills = skills.some(s => s.functions.includes(fn.id));
                 return (
-                  <button key={fn.id} onClick={() => togFn(fn.id)} style={{ padding: '6px 14px', borderRadius: 7, border: `1.5px solid ${a ? fn.color + '50' : '#e4e4e7'}`, background: a ? fn.color + '0a' : '#fff' }}>
-                    <span style={{ fontSize: 13, fontWeight: a ? 700 : 500, color: a ? fn.color : '#52525b', lineHeight: 1.2 }}>{fn.label}</span>
+                  <button key={fn.id} onClick={() => hasSkills ? togFn(fn.id) : null} style={{ padding: '6px 14px', borderRadius: 7, border: `1.5px solid ${a ? fn.color + '50' : hasSkills ? '#e4e4e7' : '#f4f4f5'}`, background: a ? fn.color + '0a' : hasSkills ? '#fff' : '#fafafa', cursor: hasSkills ? 'pointer' : 'default' }}>
+                    <span style={{ fontSize: 13, fontWeight: a ? 700 : 500, color: a ? fn.color : hasSkills ? '#52525b' : '#d4d4d8', lineHeight: 1.2 }}>{fn.label}</span>
                   </button>
                 );
               })}

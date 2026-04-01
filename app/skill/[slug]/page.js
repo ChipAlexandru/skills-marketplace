@@ -1,8 +1,62 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getSkillBySlug } from '@/lib/data';
+
+/* ─── RATING PILL ─── */
+const RATING_LABELS = { 1: 'Functional', 2: 'Working draft', 3: 'Production-ready' };
+const RATING_DESCRIPTIONS = {
+  1: 'Functional, generic. The plugin produces substantive output that reflects real analytical work. However, the work is a midpoint rather than a near-final draft. The level of specificity and expert-level input is lacking. Output formatting can be improved. A senior practitioner can extract value, but the plugin likely needs customization and iteration before it is consistently useful.',
+  2: 'Professional working draft. The plugin produces well-structured output that is approximately 90% complete. A user with deep domain expertise would assess this as solid work that needs refinement. The remaining gaps require expert-level input and judgment.',
+  3: 'Production-ready. The plugin delivers finished work product in professional formats and handles edge cases gracefully. A user with deep domain expertise would assess this output as expert-level. This is the standard where you\'d be comfortable putting the output in front of a stakeholder with only light review.',
+};
+function RatingPill({ rating }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler);
+    return () => { document.removeEventListener('mousedown', handler); document.removeEventListener('touchstart', handler); };
+  }, [open]);
+  if (!rating) return null;
+  const filled = '#ea580c';
+  const empty = '#e4e4e7';
+  return (
+    <div ref={ref} style={{ position: 'relative', display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+      >
+        <svg width={54} height={7} viewBox="0 0 54 7">
+          {[0,1,2].map(i => (
+            <rect key={i} x={i*18} y={0} width={16} height={7} rx={3.5} fill={i < rating ? filled : empty} />
+          ))}
+        </svg>
+        <span style={{ fontSize: 12, fontWeight: 600, color: rating === 3 ? '#ea580c' : rating === 2 ? '#2563eb' : '#71717a' }}>
+          {RATING_LABELS[rating]}
+        </span>
+      </button>
+      {open && (
+        <div style={{
+          position: 'absolute', top: 30, right: 0, zIndex: 99,
+          background: '#fff', border: '1px solid #e4e4e7', borderRadius: 8,
+          boxShadow: '0 8px 24px rgba(0,0,0,.12)', padding: '14px 16px',
+          width: 300, textAlign: 'left',
+        }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
+            Maturity · Level {rating}/3
+          </div>
+          <p style={{ fontSize: 12.5, lineHeight: 1.65, color: '#52525b', margin: 0 }}>
+            {RATING_DESCRIPTIONS[rating]}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 /* ─── ICONS ─── */
 const BackIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>;
@@ -51,14 +105,14 @@ export default function SkillDetailPage() {
     <div style={{ minHeight: '100vh' }}>
       {/* HEADER — name only */}
       <div style={{ background: 'linear-gradient(160deg,#0f0f0f 0%,#1a1a1a 30%,#8b2500 100%)', color: '#fff' }}>
-        <div style={{ maxWidth: 860, margin: '0 auto', padding: '14px 36px 28px' }}>
+        <div style={{ maxWidth: 860, margin: '0 auto', padding: '14px 36px 24px' }}>
           <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#fb923c', fontSize: 12, fontWeight: 500, textDecoration: 'none', marginBottom: 18 }}>
             <BackIcon /> Back to directory
           </Link>
           {skill.category && (
             <div style={{ fontSize: 11, fontWeight: 700, color: '#fb923c', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 6 }}>{skill.category}</div>
           )}
-          <h1 style={{ fontSize: 30, fontWeight: 700, color: '#fff', letterSpacing: '-.02em' }}>{skill.name}</h1>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', letterSpacing: '-.02em' }}>{skill.name}</h1>
         </div>
       </div>
 
@@ -68,11 +122,12 @@ export default function SkillDetailPage() {
         {/* HERO CARD — metadata + description */}
         <div style={{
           background: '#fff', border: '1px solid #e4e4e7', borderRadius: 10,
-          padding: '24px 28px', marginTop: -1, marginBottom: 8,
+          padding: '24px 28px', marginTop: 16, marginBottom: 8,
           boxShadow: '0 2px 12px rgba(0,0,0,.04)',
         }}>
           {/* META ROW */}
-          <div style={{ display: 'flex', gap: 32, marginBottom: 16, paddingBottom: 14, borderBottom: '1px solid #f4f4f5' }}>
+          <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start', marginBottom: 16, paddingBottom: 14, borderBottom: '1px solid #f4f4f5' }}>
+            <div style={{ flex: 1, display: 'flex', gap: 32 }}>
             {skill.version && (
               <div>
                 <div style={{ fontSize: 10, fontWeight: 700, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Version</div>
@@ -87,6 +142,13 @@ export default function SkillDetailPage() {
               <div>
                 <div style={{ fontSize: 10, fontWeight: 700, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Category</div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: '#18181b' }}>{skill.category}</div>
+              </div>
+            )}
+            </div>
+            {skill.rating && (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.06em' }}>Maturity</div>
+                <RatingPill rating={skill.rating} />
               </div>
             )}
           </div>
@@ -174,37 +236,73 @@ export default function SkillDetailPage() {
           </Section>
         )}
 
-        {/* SKILLS */}
+        {/* SKILLS — summary or table */}
         {skill.skills_summary && (
           <Section title="Skills">
             <p style={{ fontSize: 14, lineHeight: 1.75, color: '#52525b', marginBottom: 8 }}>{skill.skills_summary}</p>
           </Section>
         )}
+        {skill.skills_list && skill.skills_list.length > 0 && (
+          <Section title="Skills">
+            {/* Table header */}
+            <div style={{ display: 'flex', padding: '0 0 8px', gap: 12 }}>
+              <span style={{ width: 160, fontSize: 11, fontWeight: 700, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.06em' }}>Skill</span>
+              <span style={{ flex: 1, fontSize: 11, fontWeight: 700, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.06em' }}>Description</span>
+              <span style={{ width: 80, fontSize: 11, fontWeight: 700, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.06em', textAlign: 'right' }}>Type</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
+              {skill.skills_list.map((s, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'baseline', gap: 12, padding: '10px 14px', background: '#fff', border: '1px solid #e4e4e7', borderRadius: 6 }}>
+                  <span style={{ width: 146, fontFamily: 'var(--mono)', fontSize: 12, fontWeight: 600, color: '#18181b', flexShrink: 0 }}>{s.name}</span>
+                  <span style={{ flex: 1, fontSize: 12.5, lineHeight: 1.5, color: '#52525b' }}>{s.description}</span>
+                  <span style={{
+                    width: 80, textAlign: 'right', fontSize: 10, fontWeight: 700, flexShrink: 0,
+                    color: s.type === 'Invocable' ? '#c2410c' : '#71717a',
+                  }}>{s.type}</span>
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
 
         {/* INSTALL */}
         <Section title="Install">
-          <div style={{ display: 'flex', gap: 14 }}>
-            <div style={{ flex: 1, background: '#fff', border: '1px solid #e4e4e7', borderRadius: 8, padding: '16px 18px' }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#18181b', marginBottom: 6 }}>Cowork</div>
-              <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#52525b', background: '#f4f4f5', padding: '6px 10px', borderRadius: 5, marginBottom: 12 }}>
-                Customize &rarr; Add marketplace &rarr; paste repo URL
-              </div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#18181b', marginBottom: 6 }}>Claude Code</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <code style={{ flex: 1, fontFamily: 'var(--mono)', fontSize: 11, color: '#52525b', background: '#f4f4f5', padding: '6px 10px', borderRadius: 5 }}>{installCmd}</code>
-                <CopyBtn text={installCmd} />
+          {skill.install_steps ? (
+            <div style={{ background: '#fff', border: '1px solid #e4e4e7', borderRadius: 8, padding: '18px 20px', marginBottom: 8 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#18181b', marginBottom: 10 }}>Cowork</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {skill.install_steps.map((step, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'baseline' }}>
+                    <span style={{ fontFamily: 'var(--mono)', fontSize: 12, fontWeight: 700, color: '#fb923c', flexShrink: 0 }}>{i + 1}.</span>
+                    <span style={{ fontSize: 13, lineHeight: 1.55, color: '#52525b' }}>{step}</span>
+                  </div>
+                ))}
               </div>
             </div>
-            {skill.repo_url && (
-              <a href={skill.repo_url} target="_blank" rel="noopener noreferrer" style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                width: 160, background: '#18181b', borderRadius: 8, padding: '16px', textDecoration: 'none', color: '#fff', gap: 8,
-              }}>
-                <ExternalIcon />
-                <span style={{ fontSize: 13, fontWeight: 700 }}>View on GitHub</span>
-              </a>
-            )}
-          </div>
+          ) : (
+            <div style={{ display: 'flex', gap: 14 }}>
+              <div style={{ flex: 1, background: '#fff', border: '1px solid #e4e4e7', borderRadius: 8, padding: '16px 18px' }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#18181b', marginBottom: 6 }}>Cowork</div>
+                <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#52525b', background: '#f4f4f5', padding: '6px 10px', borderRadius: 5, marginBottom: 12 }}>
+                  Customize &rarr; Add marketplace &rarr; paste repo URL
+                </div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#18181b', marginBottom: 6 }}>Claude Code</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <code style={{ flex: 1, fontFamily: 'var(--mono)', fontSize: 11, color: '#52525b', background: '#f4f4f5', padding: '6px 10px', borderRadius: 5 }}>{installCmd}</code>
+                  <CopyBtn text={installCmd} />
+                </div>
+              </div>
+              {skill.repo_url && (
+                <a href={skill.repo_url} target="_blank" rel="noopener noreferrer" style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  width: 160, background: '#18181b', borderRadius: 8, padding: '16px', textDecoration: 'none', color: '#fff', gap: 8,
+                }}>
+                  <ExternalIcon />
+                  <span style={{ fontSize: 13, fontWeight: 700 }}>View on GitHub</span>
+                </a>
+              )}
+            </div>
+          )}
         </Section>
       </div>
     </div>
