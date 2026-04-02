@@ -1,8 +1,15 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'Skills for Claude Cowork',
-  description: 'Curated enterprise AI skills — tested and reviewed.',
+  title: "ECLIPSAI – Skills Marketplace for Claude Cowork",
+  description: "A curated directory of enterprise AI skills — tested and reviewed.",
+  openGraph: {
+    title: "ECLIPSAI – Skills Marketplace for Claude Cowork",
+    description: "A curated directory of enterprise AI skills — tested and reviewed.",
+    url: "https://eclipsai.com",
+    siteName: "ECLIPSAI",
+    type: "website",
+  },
 };
 
 export const viewport = {
