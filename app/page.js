@@ -72,10 +72,6 @@ function SkillCard({ skill, index }) {
           </div>
         </div>
         <p style={{ fontSize: 13.5, lineHeight: 1.65, color: '#52525b', margin: 0, flex: 1 }}>{skill.description}</p>
-        <div style={{ display: 'flex', gap: 12, paddingTop: 8, borderTop: '1px solid #f4f4f5' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--mono)', fontSize: 11, color: '#a1a1aa' }}><StarIcon />{skill.stars}</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--mono)', fontSize: 11, color: '#a1a1aa' }}><DownloadIcon />{skill.installs}</span>
-        </div>
       </div>
     </Link>
   );
